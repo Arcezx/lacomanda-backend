@@ -6,6 +6,10 @@ import com.lacomanda.backend.entity.EstadoPedido;
 import com.lacomanda.backend.service.PedidoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -44,5 +48,14 @@ public class PedidoController {
     public ResponseEntity<PedidoResponseDTO> updateEstado(@PathVariable Long id,
                                                           @RequestParam EstadoPedido nuevoEstado) {
         return ResponseEntity.ok(pedidoService.updateEstado(id, nuevoEstado));
+    }
+
+    @GetMapping("/paginado")
+    public ResponseEntity<Page<PedidoResponseDTO>> findAllPaginado(
+            @RequestParam(defaultValue = "0") int pagina,
+            @RequestParam(defaultValue = "10") int tamanio) {
+
+        Pageable pageable = PageRequest.of(pagina, tamanio, Sort.by(Sort.Direction.DESC, "fecha"));
+        return ResponseEntity.ok(pedidoService.findAllPaginado(pageable));
     }
 }

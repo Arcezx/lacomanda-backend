@@ -14,6 +14,8 @@ import com.lacomanda.backend.repository.CategoriaRepository;
 import com.lacomanda.backend.repository.ProductoRepository;
 import com.lacomanda.backend.service.ProductoService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,6 +40,12 @@ public class ProductoServiceImpl implements ProductoService {
                 .toList();
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public Page<ProductoResponseDTO> findAllPaginado(Pageable pageable) {
+        return productoRepository.findAll(pageable)
+                .map(this::toResponseDTO);
+    }
     @Override
     @Transactional(readOnly = true)
     public List<ProductoResponseDTO> findByCategoria(Long categoriaId) {

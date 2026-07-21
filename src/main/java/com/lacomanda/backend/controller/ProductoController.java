@@ -5,6 +5,9 @@ import com.lacomanda.backend.dto.ProductoResponseDTO;
 import com.lacomanda.backend.service.ProductoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -31,6 +34,15 @@ public class ProductoController {
     @GetMapping("/{id}")
     public ResponseEntity<ProductoResponseDTO> findById(@PathVariable Long id) {
         return ResponseEntity.ok(productoService.findById(id));
+    }
+
+    @GetMapping("/paginado")
+    public ResponseEntity<Page<ProductoResponseDTO>> findAllPaginado(
+            @RequestParam(defaultValue = "0") int pagina,
+            @RequestParam(defaultValue = "10") int tamanio) {
+
+        Pageable pageable = PageRequest.of(pagina, tamanio);
+        return ResponseEntity.ok(productoService.findAllPaginado(pageable));
     }
 
     @PostMapping

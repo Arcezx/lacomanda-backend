@@ -9,6 +9,8 @@ import com.lacomanda.backend.repository.PedidoRepository;
 import com.lacomanda.backend.repository.ProductoRepository;
 import com.lacomanda.backend.service.PedidoService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -150,5 +152,12 @@ public class PedidoServiceImpl implements PedidoService {
         dto.setTotal(total);
 
         return dto;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<PedidoResponseDTO> findAllPaginado(Pageable pageable) {
+        return pedidoRepository.findAll(pageable)
+                .map(this::toResponseDTO);
     }
 }
