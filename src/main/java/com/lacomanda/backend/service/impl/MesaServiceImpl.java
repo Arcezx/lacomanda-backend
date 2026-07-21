@@ -3,6 +3,7 @@ package com.lacomanda.backend.service.impl;
 import com.lacomanda.backend.dto.MesaRequestDTO;
 import com.lacomanda.backend.dto.MesaResponseDTO;
 import com.lacomanda.backend.entity.Mesa;
+import com.lacomanda.backend.exception.NegocioException;
 import com.lacomanda.backend.exception.ResourceNotFoundException;
 import com.lacomanda.backend.repository.MesaRepository;
 import com.lacomanda.backend.service.MesaService;
@@ -38,6 +39,10 @@ public class MesaServiceImpl implements MesaService {
     @Override
     @Transactional
     public MesaResponseDTO create(MesaRequestDTO dto) {
+        if (mesaRepository.findByNumero(dto.getNumero()).isPresent()) {
+            throw new NegocioException("Ya existe una mesa con el número " + dto.getNumero());
+        }
+
         Mesa mesa = new Mesa();
         mesa.setNumero(dto.getNumero());
         mesa.setCapacidad(dto.getCapacidad());
@@ -52,13 +57,18 @@ public class MesaServiceImpl implements MesaService {
         Mesa mesa = mesaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Mesa no encontrada con id: " + id));
 
+        mesaRepository.findByNumero(dto.getNumero()).ifPresent(otraMesa -> {
+            if (!otraMesa.getId().equals(id)) {
+                throw new NegocioException("Ya existe otra mesa con el número " + dto.getNumero());
+            }
+        });
+
         mesa.setNumero(dto.getNumero());
         mesa.setCapacidad(dto.getCapacidad());
 
         Mesa actualizada = mesaRepository.save(mesa);
         return toResponseDTO(actualizada);
     }
-
     @Override
     @Transactional
     public void delete(Long id) {

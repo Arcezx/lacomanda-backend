@@ -3,6 +3,7 @@ package com.lacomanda.backend.service.impl;
 import com.lacomanda.backend.dto.UsuarioRequestDTO;
 import com.lacomanda.backend.dto.UsuarioResponseDTO;
 import com.lacomanda.backend.entity.Usuario;
+import com.lacomanda.backend.exception.NegocioException;
 import com.lacomanda.backend.exception.ResourceNotFoundException;
 import com.lacomanda.backend.repository.UsuarioRepository;
 import com.lacomanda.backend.service.UsuarioService;
@@ -40,6 +41,10 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     @Transactional
     public UsuarioResponseDTO create(UsuarioRequestDTO dto) {
+        if (usuarioRepository.findByUsername(dto.getUsername()).isPresent()) {
+            throw new NegocioException("Ya existe un usuario con el nombre de usuario " + dto.getUsername());
+        }
+
         Usuario usuario = new Usuario();
         usuario.setUsername(dto.getUsername());
         usuario.setNombre(dto.getNombre());
@@ -55,6 +60,12 @@ public class UsuarioServiceImpl implements UsuarioService {
     public UsuarioResponseDTO update(Long id, UsuarioRequestDTO dto) {
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con id: " + id));
+
+        usuarioRepository.findByUsername(dto.getUsername()).ifPresent(otroUsuario -> {
+            if (!otroUsuario.getId().equals(id)) {
+                throw new NegocioException("Ya existe otro usuario con el nombre de usuario " + dto.getUsername());
+            }
+        });
 
         usuario.setUsername(dto.getUsername());
         usuario.setNombre(dto.getNombre());
