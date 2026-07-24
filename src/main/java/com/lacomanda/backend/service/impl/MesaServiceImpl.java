@@ -42,15 +42,13 @@ public class MesaServiceImpl implements MesaService {
         if (mesaRepository.findByNumero(dto.getNumero()).isPresent()) {
             throw new NegocioException("Ya existe una mesa con el número " + dto.getNumero());
         }
-
         Mesa mesa = new Mesa();
         mesa.setNumero(dto.getNumero());
         mesa.setCapacidad(dto.getCapacidad());
-
+        mesa.setQrCode(java.util.UUID.randomUUID().toString());
         Mesa guardada = mesaRepository.save(mesa);
         return toResponseDTO(guardada);
     }
-
     @Override
     @Transactional
     public MesaResponseDTO update(Long id, MesaRequestDTO dto) {
@@ -85,5 +83,13 @@ public class MesaServiceImpl implements MesaService {
                 mesa.getCapacidad(),
                 mesa.getQrCode()
         );
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public MesaResponseDTO findByQrCode(String qrCode) {
+        Mesa mesa = mesaRepository.findByQrCode(qrCode)
+                .orElseThrow(() -> new ResourceNotFoundException("Mesa no encontrada con código: " + qrCode));
+        return toResponseDTO(mesa);
     }
 }

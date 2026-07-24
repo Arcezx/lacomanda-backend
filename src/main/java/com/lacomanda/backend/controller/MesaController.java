@@ -39,7 +39,10 @@ public class MesaController {
                                                   @Valid @RequestBody MesaRequestDTO dto) {
         return ResponseEntity.ok(mesaService.update(id, dto));
     }
-
+    @GetMapping("/codigo/{qrCode}")
+    public ResponseEntity<MesaResponseDTO> findByQrCode(@PathVariable String qrCode) {
+        return ResponseEntity.ok(mesaService.findByQrCode(qrCode));
+    }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         mesaService.delete(id);

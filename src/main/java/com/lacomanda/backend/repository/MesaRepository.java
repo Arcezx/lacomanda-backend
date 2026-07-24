@@ -10,4 +10,5 @@ import java.util.Optional;
 public interface MesaRepository extends JpaRepository<Mesa, Long> {
 
     Optional<Mesa> findByNumero(Integer numero);
+    Optional<Mesa> findByQrCode(String qrCode);
 }

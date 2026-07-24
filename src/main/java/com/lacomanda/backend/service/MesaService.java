@@ -6,14 +6,10 @@ import com.lacomanda.backend.dto.MesaResponseDTO;
 import java.util.List;
 
 public interface MesaService {
-
     List<MesaResponseDTO> findAll();
-
     MesaResponseDTO findById(Long id);
-
+    MesaResponseDTO findByQrCode(String qrCode);
     MesaResponseDTO create(MesaRequestDTO dto);
-
     MesaResponseDTO update(Long id, MesaRequestDTO dto);
-
     void delete(Long id);
 }
