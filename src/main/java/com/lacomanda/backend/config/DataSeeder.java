@@ -42,7 +42,7 @@ public class DataSeeder implements CommandLineRunner {
         Categoria bebidas = crearCategoria("Bebidas", "Begudes", "Drinks", 9, "categorias/bebidas.jpg");
         Categoria vinos = crearCategoria("Vinos", "Vins", "Wines", 10, "categorias/vinos.jpg");
 
-        // ===================== ALÉRGENOS (10, oficiales UE) =====================
+        // ===================== ALÉRGENOS (14, oficiales UE completos) =====================
         Alergeno gluten = crearAlergeno("Gluten", "Gluten", "Gluten", "gluten.svg");
         Alergeno lacteos = crearAlergeno("Lácteos", "Lactis", "Dairy", "lacteos.svg");
         Alergeno huevo = crearAlergeno("Huevo", "Ou", "Egg", "huevo.svg");
@@ -53,24 +53,41 @@ public class DataSeeder implements CommandLineRunner {
         Alergeno mostaza = crearAlergeno("Mostaza", "Mostassa", "Mustard", "mostaza.svg");
         Alergeno apio = crearAlergeno("Apio", "Api", "Celery", "apio.svg");
         Alergeno sulfitos = crearAlergeno("Sulfitos", "Sulfits", "Sulphites", "sulfitos.svg");
+        Alergeno sesamo = crearAlergeno("Sésamo", "Sèsam", "Sesame", "sesamo.svg");
+        Alergeno cacahuetes = crearAlergeno("Cacahuetes", "Cacauets", "Peanuts", "cacahuetes.svg");
+        Alergeno altramuces = crearAlergeno("Altramuces", "Tramussos", "Lupin", "altramuces.svg");
+        Alergeno moluscos = crearAlergeno("Moluscos", "Mol·luscos", "Molluscs", "moluscos.svg");
 
         // ===================== PRODUCTOS =====================
 
-        // --- Hamburguesas ---
-        crearProducto(hamburguesas, "Hamburguesa clásica", "Hamburguesa clàssica", "Classic burger",
+        // --- Hamburguesas (con extras de prueba) ---
+        Producto hamburguesaClasica = crearProducto(hamburguesas, "Hamburguesa clásica", "Hamburguesa clàssica", "Classic burger",
                 "Carne de vacuno, queso cheddar, lechuga y tomate", "Carn de vacum, formatge cheddar, enciam i tomàquet",
                 "Beef patty, cheddar cheese, lettuce and tomato", "9.50", "productos/hamburguesa-clasica.jpg",
                 Set.of(gluten, lacteos), List.of("Pan de brioche", "Carne de vacuno", "Queso cheddar", "Lechuga", "Tomate"));
+        agregarExtras(hamburguesaClasica, List.of(
+                new Object[]{"Bacon extra", "1.50"},
+                new Object[]{"Queso extra", "1.00"},
+                new Object[]{"Huevo frito", "1.20"}
+        ));
 
-        crearProducto(hamburguesas, "Hamburguesa BBQ", "Hamburguesa BBQ", "BBQ burger",
+        Producto hamburguesaBBQ = crearProducto(hamburguesas, "Hamburguesa BBQ", "Hamburguesa BBQ", "BBQ burger",
                 "Con bacon, cebolla crujiente y salsa barbacoa", "Amb bacon, ceba cruixent i salsa barbacoa",
                 "With bacon, crispy onion and BBQ sauce", "11.00", "productos/hamburguesa-bbq.jpg",
                 Set.of(gluten, lacteos), List.of("Pan de brioche", "Carne de vacuno", "Bacon", "Cebolla crujiente", "Salsa barbacoa"));
+        agregarExtras(hamburguesaBBQ, List.of(
+                new Object[]{"Queso extra", "1.00"},
+                new Object[]{"Aguacate", "1.80"}
+        ));
 
-        crearProducto(hamburguesas, "Hamburguesa vegetal", "Hamburguesa vegetal", "Veggie burger",
+        Producto hamburguesaVegetal = crearProducto(hamburguesas, "Hamburguesa vegetal", "Hamburguesa vegetal", "Veggie burger",
                 "Base de garbanzos y verduras asadas", "Base de cigrons i verdures rostides",
                 "Chickpea and roasted vegetable patty", "9.00", "productos/hamburguesa-vegetal.jpg",
                 Set.of(gluten), List.of("Pan integral", "Garbanzos", "Pimiento asado", "Calabacín", "Lechuga"));
+        agregarExtras(hamburguesaVegetal, List.of(
+                new Object[]{"Queso vegano", "1.30"},
+                new Object[]{"Aguacate", "1.80"}
+        ));
 
         // --- Italiana ---
         crearProducto(italiana, "Spaghetti carbonara", "Espaguetis carbonara", "Spaghetti carbonara",
@@ -222,13 +239,13 @@ public class DataSeeder implements CommandLineRunner {
         a.setNombreEs(es);
         a.setNombreVal(val);
         a.setNombreEn(en);
-        a.setIcono(icono);
+        a.setIcono(BASE_IMG + "alergenos/" + icono);
         return alergenoRepository.save(a);
     }
 
-    private void crearProducto(Categoria categoria, String nombreEs, String nombreVal, String nombreEn,
-                               String descEs, String descVal, String descEn,
-                               String precio, String rutaFoto, Set<Alergeno> alergenos, List<String> nombresIngredientes) {
+    private Producto crearProducto(Categoria categoria, String nombreEs, String nombreVal, String nombreEn,
+                                   String descEs, String descVal, String descEn,
+                                   String precio, String rutaFoto, Set<Alergeno> alergenos, List<String> nombresIngredientes) {
         Producto p = new Producto();
         p.setCategoria(categoria);
         p.setNombreEs(nombreEs);
@@ -250,7 +267,18 @@ public class DataSeeder implements CommandLineRunner {
         }).toList();
         p.setIngredientes(ingredientes);
 
-        productoRepository.save(p);
+        return productoRepository.save(p);
+    }
+
+    private void agregarExtras(Producto producto, List<Object[]> extrasData) {
+        for (Object[] datos : extrasData) {
+            Extra extra = new Extra();
+            extra.setProducto(producto);
+            extra.setNombre((String) datos[0]);
+            extra.setPrecio(new BigDecimal((String) datos[1]));
+            producto.getExtras().add(extra);
+        }
+        productoRepository.save(producto);
     }
 
     private void crearUsuario(String nombre, String username, String passwordPlano, Rol rol) {

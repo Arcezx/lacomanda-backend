@@ -33,4 +33,5 @@ public class ProductoResponseDTO {
 
     private List<AlergenoResponseDTO> alergenos;
     private List<IngredienteDTO> ingredientes;
+    private List<ExtraDTO> extras;
 }

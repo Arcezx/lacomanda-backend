@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "lineas_pedido")
@@ -36,4 +38,7 @@ public class LineaPedido {
 
     @Column(name = "notas", columnDefinition = "TEXT")
     private String notas;
+
+    @OneToMany(mappedBy = "lineaPedido", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<LineaPedidoExtra> extras = new ArrayList<>();
 }

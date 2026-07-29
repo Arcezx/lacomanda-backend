@@ -28,19 +28,13 @@ public class PedidoServiceImpl implements PedidoService {
     @Override
     @Transactional(readOnly = true)
     public List<PedidoResponseDTO> findAll() {
-        return pedidoRepository.findAll()
-                .stream()
-                .map(this::toResponseDTO)
-                .toList();
+        return pedidoRepository.findAll().stream().map(this::toResponseDTO).toList();
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<PedidoResponseDTO> findByEstado(EstadoPedido estado) {
-        return pedidoRepository.findByEstado(estado)
-                .stream()
-                .map(this::toResponseDTO)
-                .toList();
+        return pedidoRepository.findByEstado(estado).stream().map(this::toResponseDTO).toList();
     }
 
     @Override
@@ -78,6 +72,24 @@ public class PedidoServiceImpl implements PedidoService {
             linea.setCantidad(lineaDTO.getCantidad());
             linea.setNotas(lineaDTO.getNotas());
 
+            if (lineaDTO.getExtras() != null) {
+                for (ExtraSeleccionadoDTO extraSel : lineaDTO.getExtras()) {
+                    Extra extra = producto.getExtras().stream()
+                            .filter(e -> e.getId().equals(extraSel.getExtraId()))
+                            .findFirst()
+                            .orElseThrow(() -> new NegocioException(
+                                    "El extra seleccionado no pertenece a este producto"));
+
+                    LineaPedidoExtra lpe = new LineaPedidoExtra();
+                    lpe.setLineaPedido(linea);
+                    lpe.setNombre(extra.getNombre());
+                    lpe.setPrecioUnitario(extra.getPrecio());
+                    lpe.setCantidad(extraSel.getCantidad());
+
+                    linea.getExtras().add(lpe);
+                }
+            }
+
             pedido.getLineas().add(linea);
         }
 
@@ -97,9 +109,7 @@ public class PedidoServiceImpl implements PedidoService {
     public PedidoResponseDTO updateEstado(Long id, EstadoPedido nuevoEstado) {
         Pedido pedido = pedidoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Pedido no encontrado con id: " + id));
-
         pedido.setEstado(nuevoEstado);
-
         Pedido actualizado = pedidoRepository.save(pedido);
         return toResponseDTO(actualizado);
     }
@@ -135,29 +145,46 @@ public class PedidoServiceImpl implements PedidoService {
         }
 
         List<LineaPedidoResponseDTO> lineasDTO = pedido.getLineas().stream()
-                .map(linea -> new LineaPedidoResponseDTO(
-                        linea.getId(),
-                        linea.getProducto().getId(),
-                        linea.getProducto().getNombreEs(),
-                        linea.getPrecioUnitario(),
-                        linea.getCantidad(),
-                        linea.getNotas()
-                ))
+                .map(this::toLineaResponseDTO)
                 .toList();
         dto.setLineas(lineasDTO);
 
         BigDecimal total = lineasDTO.stream()
-                .map(l -> l.getPrecioUnitario().multiply(BigDecimal.valueOf(l.getCantidad())))
+                .map(LineaPedidoResponseDTO::getSubtotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         dto.setTotal(total);
 
         return dto;
     }
 
+    private LineaPedidoResponseDTO toLineaResponseDTO(LineaPedido linea) {
+        List<ExtraDTO> extrasDTO = linea.getExtras().stream()
+                .map(e -> new ExtraDTO(e.getId(), e.getNombre(), e.getPrecioUnitario()))
+                .toList();
+
+        BigDecimal totalExtrasPorUnidad = linea.getExtras().stream()
+                .map(e -> e.getPrecioUnitario().multiply(BigDecimal.valueOf(e.getCantidad())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BigDecimal subtotal = linea.getPrecioUnitario()
+                .multiply(BigDecimal.valueOf(linea.getCantidad()))
+                .add(totalExtrasPorUnidad);
+
+        return new LineaPedidoResponseDTO(
+                linea.getId(),
+                linea.getProducto().getId(),
+                linea.getProducto().getNombreEs(),
+                linea.getPrecioUnitario(),
+                linea.getCantidad(),
+                linea.getNotas(),
+                extrasDTO,
+                subtotal
+        );
+    }
+
     @Override
     @Transactional(readOnly = true)
     public Page<PedidoResponseDTO> findAllPaginado(Pageable pageable) {
-        return pedidoRepository.findAll(pageable)
-                .map(this::toResponseDTO);
+        return pedidoRepository.findAll(pageable).map(this::toResponseDTO);
     }
 }

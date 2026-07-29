@@ -45,4 +45,5 @@ public class ProductoRequestDTO {
     private Set<Long> alergenoIds;
 
     private List<IngredienteDTO> ingredientes;
+    private List<ExtraDTO> extras;
 }

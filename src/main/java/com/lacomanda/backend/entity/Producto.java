@@ -63,4 +63,7 @@ public class Producto {
 
     @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Ingrediente> ingredientes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Extra> extras = new ArrayList<>();
 }

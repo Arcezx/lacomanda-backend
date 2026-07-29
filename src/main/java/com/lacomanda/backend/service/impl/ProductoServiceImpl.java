@@ -1,11 +1,13 @@
 package com.lacomanda.backend.service.impl;
 
 import com.lacomanda.backend.dto.AlergenoResponseDTO;
+import com.lacomanda.backend.dto.ExtraDTO;
 import com.lacomanda.backend.dto.IngredienteDTO;
 import com.lacomanda.backend.dto.ProductoRequestDTO;
 import com.lacomanda.backend.dto.ProductoResponseDTO;
 import com.lacomanda.backend.entity.Alergeno;
 import com.lacomanda.backend.entity.Categoria;
+import com.lacomanda.backend.entity.Extra;
 import com.lacomanda.backend.entity.Ingrediente;
 import com.lacomanda.backend.entity.Producto;
 import com.lacomanda.backend.exception.ResourceNotFoundException;
@@ -34,25 +36,19 @@ public class ProductoServiceImpl implements ProductoService {
     @Override
     @Transactional(readOnly = true)
     public List<ProductoResponseDTO> findAll() {
-        return productoRepository.findAll()
-                .stream()
-                .map(this::toResponseDTO)
-                .toList();
+        return productoRepository.findAll().stream().map(this::toResponseDTO).toList();
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page<ProductoResponseDTO> findAllPaginado(Pageable pageable) {
-        return productoRepository.findAll(pageable)
-                .map(this::toResponseDTO);
+        return productoRepository.findAll(pageable).map(this::toResponseDTO);
     }
+
     @Override
     @Transactional(readOnly = true)
     public List<ProductoResponseDTO> findByCategoria(Long categoriaId) {
-        return productoRepository.findByCategoriaId(categoriaId)
-                .stream()
-                .map(this::toResponseDTO)
-                .toList();
+        return productoRepository.findByCategoriaId(categoriaId).stream().map(this::toResponseDTO).toList();
     }
 
     @Override
@@ -68,7 +64,6 @@ public class ProductoServiceImpl implements ProductoService {
     public ProductoResponseDTO create(ProductoRequestDTO dto) {
         Producto producto = new Producto();
         mapRequestToEntity(dto, producto);
-
         Producto guardado = productoRepository.save(producto);
         return toResponseDTO(guardado);
     }
@@ -78,9 +73,7 @@ public class ProductoServiceImpl implements ProductoService {
     public ProductoResponseDTO update(Long id, ProductoRequestDTO dto) {
         Producto producto = productoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado con id: " + id));
-
         mapRequestToEntity(dto, producto);
-
         Producto actualizado = productoRepository.save(producto);
         return toResponseDTO(actualizado);
     }
@@ -93,7 +86,6 @@ public class ProductoServiceImpl implements ProductoService {
         }
         productoRepository.deleteById(id);
     }
-
 
     private void mapRequestToEntity(ProductoRequestDTO dto, Producto producto) {
         Categoria categoria = categoriaRepository.findById(dto.getCategoriaId())
@@ -127,6 +119,17 @@ public class ProductoServiceImpl implements ProductoService {
                 producto.getIngredientes().add(ingrediente);
             }
         }
+
+        producto.getExtras().clear();
+        if (dto.getExtras() != null) {
+            for (ExtraDTO extraDTO : dto.getExtras()) {
+                Extra extra = new Extra();
+                extra.setNombre(extraDTO.getNombre());
+                extra.setPrecio(extraDTO.getPrecio());
+                extra.setProducto(producto);
+                producto.getExtras().add(extra);
+            }
+        }
     }
 
     private ProductoResponseDTO toResponseDTO(Producto producto) {
@@ -153,6 +156,11 @@ public class ProductoServiceImpl implements ProductoService {
                 .map(i -> new IngredienteDTO(i.getId(), i.getNombre()))
                 .toList();
         dto.setIngredientes(ingredientesDTO);
+
+        List<ExtraDTO> extrasDTO = producto.getExtras().stream()
+                .map(e -> new ExtraDTO(e.getId(), e.getNombre(), e.getPrecio()))
+                .toList();
+        dto.setExtras(extrasDTO);
 
         return dto;
     }
