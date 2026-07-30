@@ -11,6 +11,7 @@ import com.lacomanda.backend.service.PedidoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +25,7 @@ public class PedidoServiceImpl implements PedidoService {
     private final PedidoRepository pedidoRepository;
     private final MesaRepository mesaRepository;
     private final ProductoRepository productoRepository;
+    private final SimpMessagingTemplate messagingTemplate;
 
     @Override
     @Transactional(readOnly = true)
@@ -101,7 +103,11 @@ public class PedidoServiceImpl implements PedidoService {
         }
 
         Pedido guardado = pedidoRepository.save(pedido);
-        return toResponseDTO(guardado);
+        PedidoResponseDTO respuestaDTO = toResponseDTO(guardado);
+
+        messagingTemplate.convertAndSend("/topic/pedidos", respuestaDTO);
+
+        return respuestaDTO;
     }
 
     @Override

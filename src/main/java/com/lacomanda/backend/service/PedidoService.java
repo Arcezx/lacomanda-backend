@@ -5,6 +5,7 @@ import com.lacomanda.backend.dto.PedidoResponseDTO;
 import com.lacomanda.backend.entity.EstadoPedido;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import java.util.List;
 
@@ -21,4 +22,6 @@ public interface PedidoService {
     PedidoResponseDTO create(PedidoRequestDTO dto);
 
     PedidoResponseDTO updateEstado(Long id, EstadoPedido nuevoEstado);
+
+
 }
