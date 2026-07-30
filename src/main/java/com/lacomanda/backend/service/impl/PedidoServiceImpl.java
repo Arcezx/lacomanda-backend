@@ -117,7 +117,11 @@ public class PedidoServiceImpl implements PedidoService {
                 .orElseThrow(() -> new ResourceNotFoundException("Pedido no encontrado con id: " + id));
         pedido.setEstado(nuevoEstado);
         Pedido actualizado = pedidoRepository.save(pedido);
-        return toResponseDTO(actualizado);
+
+        PedidoResponseDTO respuestaDTO = toResponseDTO(actualizado);
+        messagingTemplate.convertAndSend("/topic/pedidos-actualizados", respuestaDTO);
+
+        return respuestaDTO;
     }
 
     private void validarTipoPedido(PedidoRequestDTO dto) {
