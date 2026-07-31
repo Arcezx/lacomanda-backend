@@ -30,6 +30,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        // --- Público, sin token ---
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/imagenes/**").permitAll()
                         .requestMatchers("/ws/**").permitAll()
@@ -40,6 +41,33 @@ public class SecurityConfig {
                                 "/api/mesas/codigo/**"
                         ).permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/pedidos").permitAll()
+
+                        //Requiere token, cualquier rol (ADMIN o CAMARERO)
+                        .requestMatchers(HttpMethod.GET, "/api/pedidos/**").authenticated()
+                        .requestMatchers(HttpMethod.PATCH, "/api/pedidos/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/mesas").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/mesas/**").authenticated()
+
+                        //Solo ADMIN: gestión de carta
+                        .requestMatchers(HttpMethod.POST, "/api/categorias/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/categorias/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/categorias/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/productos/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/productos/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/productos/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/alergenos/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/alergenos/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/alergenos/**").hasRole("ADMIN")
+
+                        //Solo ADMIN: gestión de mesas (crear/editar/borrar)
+                        .requestMatchers(HttpMethod.POST, "/api/mesas").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/mesas/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/mesas/**").hasRole("ADMIN")
+
+                        //Solo ADMIN: gestión de usuarios
+                        .requestMatchers("/api/usuarios/**").hasRole("ADMIN")
+
+                        //Cualquier otra cosa: requiere estar logueado, sin más restricción
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
