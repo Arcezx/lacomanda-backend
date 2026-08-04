@@ -1,5 +1,4 @@
 package com.lacomanda.backend.service.impl;
-
 import com.lacomanda.backend.dto.MesaRequestDTO;
 import com.lacomanda.backend.dto.MesaResponseDTO;
 import com.lacomanda.backend.entity.Mesa;
@@ -10,15 +9,11 @@ import com.lacomanda.backend.service.MesaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
-
 @Service
 @RequiredArgsConstructor
 public class MesaServiceImpl implements MesaService {
-
     private final MesaRepository mesaRepository;
-
     @Override
     @Transactional(readOnly = true)
     public List<MesaResponseDTO> findAll() {
@@ -27,7 +22,6 @@ public class MesaServiceImpl implements MesaService {
                 .map(this::toResponseDTO)
                 .toList();
     }
-
     @Override
     @Transactional(readOnly = true)
     public MesaResponseDTO findById(Long id) {
@@ -35,7 +29,13 @@ public class MesaServiceImpl implements MesaService {
                 .orElseThrow(() -> new ResourceNotFoundException("Mesa no encontrada con id: " + id));
         return toResponseDTO(mesa);
     }
-
+    @Override
+    @Transactional(readOnly = true)
+    public MesaResponseDTO findByQrCode(String qrCode) {
+        Mesa mesa = mesaRepository.findByQrCode(qrCode)
+                .orElseThrow(() -> new ResourceNotFoundException("Mesa no encontrada con código: " + qrCode));
+        return toResponseDTO(mesa);
+    }
     @Override
     @Transactional
     public MesaResponseDTO create(MesaRequestDTO dto) {
@@ -54,16 +54,22 @@ public class MesaServiceImpl implements MesaService {
     public MesaResponseDTO update(Long id, MesaRequestDTO dto) {
         Mesa mesa = mesaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Mesa no encontrada con id: " + id));
-
         mesaRepository.findByNumero(dto.getNumero()).ifPresent(otraMesa -> {
             if (!otraMesa.getId().equals(id)) {
                 throw new NegocioException("Ya existe otra mesa con el número " + dto.getNumero());
             }
         });
-
         mesa.setNumero(dto.getNumero());
         mesa.setCapacidad(dto.getCapacidad());
-
+        Mesa actualizada = mesaRepository.save(mesa);
+        return toResponseDTO(actualizada);
+    }
+    @Override
+    @Transactional
+    public MesaResponseDTO cambiarOcupacion(Long id, boolean ocupada) {
+        Mesa mesa = mesaRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Mesa no encontrada con id: " + id));
+        mesa.setOcupada(ocupada);
         Mesa actualizada = mesaRepository.save(mesa);
         return toResponseDTO(actualizada);
     }
@@ -75,21 +81,13 @@ public class MesaServiceImpl implements MesaService {
         }
         mesaRepository.deleteById(id);
     }
-
     private MesaResponseDTO toResponseDTO(Mesa mesa) {
         return new MesaResponseDTO(
                 mesa.getId(),
                 mesa.getNumero(),
                 mesa.getCapacidad(),
-                mesa.getQrCode()
+                mesa.getQrCode(),
+                mesa.isOcupada()
         );
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public MesaResponseDTO findByQrCode(String qrCode) {
-        Mesa mesa = mesaRepository.findByQrCode(qrCode)
-                .orElseThrow(() -> new ResourceNotFoundException("Mesa no encontrada con código: " + qrCode));
-        return toResponseDTO(mesa);
     }
 }

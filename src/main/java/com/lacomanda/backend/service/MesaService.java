@@ -12,4 +12,5 @@ public interface MesaService {
     MesaResponseDTO create(MesaRequestDTO dto);
     MesaResponseDTO update(Long id, MesaRequestDTO dto);
     void delete(Long id);
+    MesaResponseDTO cambiarOcupacion(Long id, boolean ocupada);
 }

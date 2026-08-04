@@ -201,10 +201,11 @@ public class DataSeeder implements CommandLineRunner {
                 "4.50", "productos/vino-blanco.jpg", Set.of(sulfitos), List.of("Uva albariño"));
 
         // ===================== MESAS (10) =====================
-        for (int i = 1; i <= 10; i++) {
+        int[] capacidades = {2, 2, 2, 4, 4, 4, 6, 6, 10, 10};
+        for (int i = 0; i < capacidades.length; i++) {
             Mesa mesa = new Mesa();
-            mesa.setNumero(i);
-            mesa.setCapacidad(i <= 4 ? 2 : (i <= 8 ? 4 : 6));
+            mesa.setNumero(i + 1);
+            mesa.setCapacidad(capacidades[i]);
             mesa.setQrCode(java.util.UUID.randomUUID().toString());
             mesaRepository.save(mesa);
         }

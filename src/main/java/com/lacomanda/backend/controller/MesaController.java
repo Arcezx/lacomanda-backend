@@ -1,5 +1,4 @@
 package com.lacomanda.backend.controller;
-
 import com.lacomanda.backend.dto.MesaRequestDTO;
 import com.lacomanda.backend.dto.MesaResponseDTO;
 import com.lacomanda.backend.service.MesaService;
@@ -8,40 +7,38 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
-
 @RestController
 @RequestMapping("/api/mesas")
 @RequiredArgsConstructor
 public class MesaController {
-
     private final MesaService mesaService;
-
     @GetMapping
     public ResponseEntity<List<MesaResponseDTO>> findAll() {
         return ResponseEntity.ok(mesaService.findAll());
     }
-
     @GetMapping("/{id}")
     public ResponseEntity<MesaResponseDTO> findById(@PathVariable Long id) {
         return ResponseEntity.ok(mesaService.findById(id));
     }
-
+    @GetMapping("/codigo/{qrCode}")
+    public ResponseEntity<MesaResponseDTO> findByQrCode(@PathVariable String qrCode) {
+        return ResponseEntity.ok(mesaService.findByQrCode(qrCode));
+    }
     @PostMapping
     public ResponseEntity<MesaResponseDTO> create(@Valid @RequestBody MesaRequestDTO dto) {
         MesaResponseDTO creada = mesaService.create(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(creada);
     }
-
     @PutMapping("/{id}")
     public ResponseEntity<MesaResponseDTO> update(@PathVariable Long id,
                                                   @Valid @RequestBody MesaRequestDTO dto) {
         return ResponseEntity.ok(mesaService.update(id, dto));
     }
-    @GetMapping("/codigo/{qrCode}")
-    public ResponseEntity<MesaResponseDTO> findByQrCode(@PathVariable String qrCode) {
-        return ResponseEntity.ok(mesaService.findByQrCode(qrCode));
+    @PatchMapping("/{id}/ocupada")
+    public ResponseEntity<MesaResponseDTO> cambiarOcupacion(@PathVariable Long id,
+                                                            @RequestParam boolean ocupada) {
+        return ResponseEntity.ok(mesaService.cambiarOcupacion(id, ocupada));
     }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {

@@ -26,4 +26,7 @@ public class Mesa {
 
     @Column(name = "qr_code", unique = true)
     private String qrCode;
+
+    @Column(name = "ocupada", nullable = false)
+    private boolean ocupada = false;
 }
