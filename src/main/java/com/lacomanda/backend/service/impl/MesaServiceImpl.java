@@ -7,6 +7,7 @@ import com.lacomanda.backend.exception.ResourceNotFoundException;
 import com.lacomanda.backend.repository.MesaRepository;
 import com.lacomanda.backend.service.MesaService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
@@ -14,6 +15,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MesaServiceImpl implements MesaService {
     private final MesaRepository mesaRepository;
+    private final SimpMessagingTemplate messagingTemplate;
+
     @Override
     @Transactional(readOnly = true)
     public List<MesaResponseDTO> findAll() {
@@ -70,14 +73,22 @@ public class MesaServiceImpl implements MesaService {
         Mesa mesa = mesaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Mesa no encontrada con id: " + id));
 
-        if (ocupada && !mesa.isOcupada()) {
-            // Pasa de libre a ocupada: nueva sesión, los pedidos viejos quedan "cerrados"
-            mesa.setSesionActual(java.util.UUID.randomUUID().toString());
-        }
+        boolean seLibero = mesa.isOcupada() && !ocupada;
 
+        if (ocupada && !mesa.isOcupada()) {
+            mesa.setSesionActual(java.util.UUID.randomUUID().toString());
+        } else if (!ocupada) {
+            mesa.setSesionActual(null);
+        }
         mesa.setOcupada(ocupada);
         Mesa actualizada = mesaRepository.save(mesa);
-        return toResponseDTO(actualizada);
+        MesaResponseDTO respuestaDTO = toResponseDTO(actualizada);
+
+        if (seLibero) {
+            messagingTemplate.convertAndSend("/topic/mesas-actualizadas", respuestaDTO);
+        }
+
+        return respuestaDTO;
     }
     @Override
     @Transactional
