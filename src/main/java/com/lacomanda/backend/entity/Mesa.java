@@ -29,4 +29,7 @@ public class Mesa {
 
     @Column(name = "ocupada", nullable = false)
     private boolean ocupada = false;
+
+    @Column(name = "sesion_actual")
+    private String sesionActual;
 }

@@ -69,6 +69,12 @@ public class MesaServiceImpl implements MesaService {
     public MesaResponseDTO cambiarOcupacion(Long id, boolean ocupada) {
         Mesa mesa = mesaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Mesa no encontrada con id: " + id));
+
+        if (ocupada && !mesa.isOcupada()) {
+            // Pasa de libre a ocupada: nueva sesión, los pedidos viejos quedan "cerrados"
+            mesa.setSesionActual(java.util.UUID.randomUUID().toString());
+        }
+
         mesa.setOcupada(ocupada);
         Mesa actualizada = mesaRepository.save(mesa);
         return toResponseDTO(actualizada);
@@ -87,7 +93,8 @@ public class MesaServiceImpl implements MesaService {
                 mesa.getNumero(),
                 mesa.getCapacidad(),
                 mesa.getQrCode(),
-                mesa.isOcupada()
+                mesa.isOcupada(),
+                mesa.getSesionActual()
         );
     }
 }

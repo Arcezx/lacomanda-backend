@@ -23,6 +23,7 @@ public class PedidoResponseDTO {
     private EstadoPedido estado;
     private LocalDateTime fecha;
     private FormaPago formaPago;
+    private String sesionMesaId;
 
     private Integer mesaNumero; // null si es domicilio
 

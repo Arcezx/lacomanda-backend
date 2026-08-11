@@ -44,4 +44,7 @@ public class Pedido {
 
     @OneToOne(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
     private Domicilio domicilio;
+
+    @Column(name = "sesion_mesa_id")
+    private String sesionMesaId;
 }

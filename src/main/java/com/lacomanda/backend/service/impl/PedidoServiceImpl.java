@@ -59,9 +59,15 @@ public class PedidoServiceImpl implements PedidoService {
         if (dto.getTipo() == TipoPedido.LOCAL) {
             Mesa mesa = mesaRepository.findById(dto.getMesaId())
                     .orElseThrow(() -> new ResourceNotFoundException("Mesa no encontrada con id: " + dto.getMesaId()));
+
+            if (!mesa.isOcupada()) {
+                mesa.setSesionActual(java.util.UUID.randomUUID().toString());
+            }
             mesa.setOcupada(true);
             mesaRepository.save(mesa);
+
             pedido.setMesa(mesa);
+            pedido.setSesionMesaId(mesa.getSesionActual());
         }
 
         for (LineaPedidoRequestDTO lineaDTO : dto.getLineas()) {
@@ -142,6 +148,7 @@ public class PedidoServiceImpl implements PedidoService {
         dto.setEstado(pedido.getEstado());
         dto.setFecha(pedido.getFecha());
         dto.setFormaPago(pedido.getFormaPago());
+        dto.setSesionMesaId(pedido.getSesionMesaId());
 
         if (pedido.getMesa() != null) {
             dto.setMesaNumero(pedido.getMesa().getNumero());

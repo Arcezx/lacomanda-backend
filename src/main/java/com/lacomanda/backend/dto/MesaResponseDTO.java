@@ -3,7 +3,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
 @Getter
 @Setter
 @NoArgsConstructor
@@ -14,4 +13,5 @@ public class MesaResponseDTO {
     private Integer capacidad;
     private String qrCode;
     private boolean ocupada;
+    private String sesionActual;
 }
