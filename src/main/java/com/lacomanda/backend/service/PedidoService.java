@@ -23,5 +23,5 @@ public interface PedidoService {
 
     PedidoResponseDTO updateEstado(Long id, EstadoPedido nuevoEstado);
 
-
+    List<PedidoResponseDTO> findBySesionMesa(String sesionMesaId);
 }

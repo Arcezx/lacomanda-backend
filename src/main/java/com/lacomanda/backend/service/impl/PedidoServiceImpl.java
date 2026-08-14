@@ -38,7 +38,14 @@ public class PedidoServiceImpl implements PedidoService {
     public List<PedidoResponseDTO> findByEstado(EstadoPedido estado) {
         return pedidoRepository.findByEstado(estado).stream().map(this::toResponseDTO).toList();
     }
-
+    @Override
+    @Transactional(readOnly = true)
+    public List<PedidoResponseDTO> findBySesionMesa(String sesionMesaId) {
+        return pedidoRepository.findBySesionMesaId(sesionMesaId)
+                .stream()
+                .map(this::toResponseDTO)
+                .toList();
+    }
     @Override
     @Transactional(readOnly = true)
     public PedidoResponseDTO findById(Long id) {

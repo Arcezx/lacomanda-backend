@@ -45,4 +45,8 @@ public class MesaController {
         mesaService.delete(id);
         return ResponseEntity.noContent().build();
     }
+    @PatchMapping("/codigo/{qrCode}/pagar")
+    public ResponseEntity<MesaResponseDTO> pagarYLiberar(@PathVariable String qrCode) {
+        return ResponseEntity.ok(mesaService.pagarYLiberar(qrCode));
+    }
 }

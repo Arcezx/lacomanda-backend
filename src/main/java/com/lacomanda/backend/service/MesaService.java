@@ -13,4 +13,5 @@ public interface MesaService {
     MesaResponseDTO update(Long id, MesaRequestDTO dto);
     void delete(Long id);
     MesaResponseDTO cambiarOcupacion(Long id, boolean ocupada);
+    MesaResponseDTO pagarYLiberar(String qrCode);
 }

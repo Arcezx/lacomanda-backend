@@ -38,7 +38,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET,
                                 "/api/categorias/**",
                                 "/api/productos/**",
-                                "/api/mesas/codigo/**"
+                                "/api/mesas/codigo/**",
+                                "/api/pedidos/sesion/**"
                         ).permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/pedidos").permitAll()
 
@@ -63,7 +64,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/mesas").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/mesas/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/mesas/**").hasRole("ADMIN")
-
+                        .requestMatchers(HttpMethod.PATCH, "/api/mesas/codigo/*/pagar").permitAll()
                         //Solo ADMIN: gestión de usuarios
                         .requestMatchers("/api/usuarios/**").hasRole("ADMIN")
 

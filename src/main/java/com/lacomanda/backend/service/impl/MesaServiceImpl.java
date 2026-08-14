@@ -1,10 +1,13 @@
 package com.lacomanda.backend.service.impl;
 import com.lacomanda.backend.dto.MesaRequestDTO;
 import com.lacomanda.backend.dto.MesaResponseDTO;
+import com.lacomanda.backend.entity.EstadoPedido;
 import com.lacomanda.backend.entity.Mesa;
+import com.lacomanda.backend.entity.Pedido;
 import com.lacomanda.backend.exception.NegocioException;
 import com.lacomanda.backend.exception.ResourceNotFoundException;
 import com.lacomanda.backend.repository.MesaRepository;
+import com.lacomanda.backend.repository.PedidoRepository;
 import com.lacomanda.backend.service.MesaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -16,7 +19,7 @@ import java.util.List;
 public class MesaServiceImpl implements MesaService {
     private final MesaRepository mesaRepository;
     private final SimpMessagingTemplate messagingTemplate;
-
+    private final PedidoRepository pedidoRepository;
     @Override
     @Transactional(readOnly = true)
     public List<MesaResponseDTO> findAll() {
@@ -80,6 +83,7 @@ public class MesaServiceImpl implements MesaService {
         } else if (!ocupada) {
             mesa.setSesionActual(null);
         }
+
         mesa.setOcupada(ocupada);
         Mesa actualizada = mesaRepository.save(mesa);
         MesaResponseDTO respuestaDTO = toResponseDTO(actualizada);
@@ -107,5 +111,33 @@ public class MesaServiceImpl implements MesaService {
                 mesa.isOcupada(),
                 mesa.getSesionActual()
         );
+    }
+
+    @Override
+    @Transactional
+    public MesaResponseDTO pagarYLiberar(String qrCode) {
+        Mesa mesa = mesaRepository.findByQrCode(qrCode)
+                .orElseThrow(() -> new ResourceNotFoundException("Mesa no encontrada con código: " + qrCode));
+
+        if (!mesa.isOcupada()) {
+            throw new NegocioException("Esta mesa ya está libre");
+        }
+
+        List<Pedido> pedidosDeSesion = pedidoRepository.findBySesionMesaId(mesa.getSesionActual());
+        boolean todosEnviados = !pedidosDeSesion.isEmpty()
+                && pedidosDeSesion.stream().allMatch(p -> p.getEstado() == EstadoPedido.ENVIADO);
+
+        if (!todosEnviados) {
+            throw new NegocioException("Todavía hay pedidos sin servir, no se puede pagar");
+        }
+
+        mesa.setOcupada(false);
+        mesa.setSesionActual(null);
+        Mesa actualizada = mesaRepository.save(mesa);
+        MesaResponseDTO respuestaDTO = toResponseDTO(actualizada);
+
+        messagingTemplate.convertAndSend("/topic/mesas-actualizadas", respuestaDTO);
+
+        return respuestaDTO;
     }
 }
