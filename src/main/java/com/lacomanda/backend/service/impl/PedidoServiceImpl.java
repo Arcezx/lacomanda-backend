@@ -211,6 +211,7 @@ public class PedidoServiceImpl implements PedidoService {
                 linea.getId(),
                 linea.getProducto().getId(),
                 linea.getProducto().getNombreEs(),
+                linea.getProducto().getCategoria().getNombreEs(),
                 linea.getPrecioUnitario(),
                 linea.getCantidad(),
                 linea.getNotas(),
