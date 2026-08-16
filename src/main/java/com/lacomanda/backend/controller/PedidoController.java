@@ -12,6 +12,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
 import java.util.List;
 @RestController
 @RequestMapping("/api/pedidos")
@@ -50,5 +52,13 @@ public class PedidoController {
             @RequestParam(defaultValue = "10") int tamanio) {
         Pageable pageable = PageRequest.of(pagina, tamanio, Sort.by(Sort.Direction.DESC, "fecha"));
         return ResponseEntity.ok(pedidoService.findAllPaginado(pageable));
+    }
+    @GetMapping("/rango")
+    public ResponseEntity<List<PedidoResponseDTO>> findByRangoFechas(
+            @RequestParam String desde,
+            @RequestParam String hasta) {
+        LocalDateTime fechaDesde = LocalDateTime.parse(desde);
+        LocalDateTime fechaHasta = LocalDateTime.parse(hasta);
+        return ResponseEntity.ok(pedidoService.findByRangoFechas(fechaDesde, fechaHasta));
     }
 }

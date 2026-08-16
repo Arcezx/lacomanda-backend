@@ -42,6 +42,7 @@ public class SecurityConfig {
                                 "/api/pedidos/sesion/**"
                         ).permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/pedidos").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/pedidos/**").authenticated()
 
                         //Requiere token, cualquier rol (ADMIN o CAMARERO)
                         .requestMatchers(HttpMethod.GET, "/api/pedidos/**").authenticated()

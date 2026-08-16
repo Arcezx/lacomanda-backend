@@ -1,27 +1,18 @@
 package com.lacomanda.backend.service;
-
 import com.lacomanda.backend.dto.PedidoRequestDTO;
 import com.lacomanda.backend.dto.PedidoResponseDTO;
 import com.lacomanda.backend.entity.EstadoPedido;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
-
+import java.time.LocalDateTime;
 import java.util.List;
-
 public interface PedidoService {
-
     List<PedidoResponseDTO> findAll();
-
     Page<PedidoResponseDTO> findAllPaginado(Pageable pageable);
-
     List<PedidoResponseDTO> findByEstado(EstadoPedido estado);
-
     PedidoResponseDTO findById(Long id);
-
     PedidoResponseDTO create(PedidoRequestDTO dto);
-
     PedidoResponseDTO updateEstado(Long id, EstadoPedido nuevoEstado);
-
     List<PedidoResponseDTO> findBySesionMesa(String sesionMesaId);
+    List<PedidoResponseDTO> findByRangoFechas(LocalDateTime desde, LocalDateTime hasta);
 }

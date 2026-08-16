@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -46,6 +47,16 @@ public class PedidoServiceImpl implements PedidoService {
                 .map(this::toResponseDTO)
                 .toList();
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<PedidoResponseDTO> findByRangoFechas(LocalDateTime desde, LocalDateTime hasta) {
+        return pedidoRepository.findByFechaBetween(desde, hasta)
+                .stream()
+                .map(this::toResponseDTO)
+                .toList();
+    }
+
     @Override
     @Transactional(readOnly = true)
     public PedidoResponseDTO findById(Long id) {
@@ -213,4 +224,5 @@ public class PedidoServiceImpl implements PedidoService {
     public Page<PedidoResponseDTO> findAllPaginado(Pageable pageable) {
         return pedidoRepository.findAll(pageable).map(this::toResponseDTO);
     }
+
 }
