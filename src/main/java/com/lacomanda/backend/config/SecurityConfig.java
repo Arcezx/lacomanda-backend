@@ -71,7 +71,8 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(List.of(
                 "http://localhost:8100", "http://localhost:4200", "http://localhost:4300", "http://localhost:4400",
                 "https://lacomanda-carta.netlify.app",
-                "https://lacomanda-cocina.netlify.app"
+                "https://lacomanda-cocina.netlify.app",
+                "https://lacomanda-camarero.netlify.app"
         ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
