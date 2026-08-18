@@ -14,7 +14,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                         "http://localhost:8100", "http://localhost:4200", "http://localhost:4300", "http://localhost:4400",
                         "https://lacomanda-carta.netlify.app",
                         "https://lacomanda-cocina.netlify.app",
-                        "https://lacomanda-camarero.netlify.app"
+                        "https://lacomanda-camarero.netlify.app",
+                        "https://lacomanda-admin.netlify.app"
                 )
                 .withSockJS();
     }
